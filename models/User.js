@@ -17,6 +17,14 @@ const userSchema = new Schema(
       type: Number,
       default: 0,
     },
+    total_incomes: {
+      type: Number,
+      default: 0,
+    },
+    total_expenses: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 )

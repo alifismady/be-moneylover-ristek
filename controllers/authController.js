@@ -3,13 +3,19 @@ const jwt = require('jsonwebtoken')
 const User = require('../models/User')
 
 const createToken = (_id) => {
-  return jwt.sign({_id}, process.env.SECRET_KEY)
+  return jwt.sign({ _id }, process.env.SECRET_KEY)
 }
 
 // register
 const register = async (req, res) => {
   try {
     const { username, password } = req.body
+
+    const user = await User.findOne({ username: username })
+
+    if (user) {
+      return res.status(404).json({ error: 'Username is already used !' })
+    }
 
     const salt = await bcrypt.genSalt()
     const hashed = await bcrypt.hash(password, salt)
@@ -29,29 +35,26 @@ const register = async (req, res) => {
 
 // login
 const login = async (req, res) => {
-  
   try {
     const { username, password } = req.body
 
     const user = await User.findOne({ username: username })
 
-    if(!user) {
-      return res.status(404).json({ msg: 'Username does not exist !'})
+    if (!user) {
+      return res.status(404).json({ error: 'Username does not exist !' })
     }
 
     const checkPassword = await bcrypt.compare(password, user.password)
-    if(!checkPassword){
-      return res.status(400).json({ msg: 'Wrong password !'})
+    if (!checkPassword) {
+      return res.status(404).json({ error: 'Wrong password !' })
     }
 
     const token = createToken(user._id)
 
     res.status(200).json({ user, token })
-
   } catch (error) {
     res.status(400).json({ error: error.message })
   }
-
 }
 
 module.exports = {

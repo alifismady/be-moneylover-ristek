@@ -1,14 +1,14 @@
 const User = require('../models/User')
 
 // GET user balance
-const getBalance = async (req, res) => {
+const getUser = async (req, res) => {
   try {
     const user_id = req.user._id
     const user = await User.findById(user_id);
     if (!user) {
       throw new Error('User not found');
     }
-    res.status(200).json({ balance: user.balance })
+    res.status(200).json(user)
   } catch (error) {
     throw new Error('Failed to get balance: ' + error.message);
   }
@@ -22,10 +22,19 @@ const updateBalance = async (userId, transactionAmount, transactionType) => {
     if (!user) {
       throw new Error('User not found')
     }
+
+    transactionAmount = parseFloat(transactionAmount);
+
+    if (isNaN(transactionAmount)) {
+      throw new Error('Invalid transaction amount');
+    }
+
     if (transactionType === 'Income') {
       user.balance += transactionAmount
+      user.total_incomes += transactionAmount
     } else if (transactionType === 'Expense') {
       user.balance -= transactionAmount
+      user.total_expenses += transactionAmount
     } else {
       throw new Error('Invalid transaction type')
     }
@@ -37,6 +46,6 @@ const updateBalance = async (userId, transactionAmount, transactionType) => {
 }
 
 module.exports = {
-  getBalance,
+  getUser,
   updateBalance,
 }
